@@ -1,6 +1,8 @@
 flask-project.code-workspace
-flask-project.code-workspace
 
 *.pyc
+
 __pycache__/
+instance/
+
 .env
