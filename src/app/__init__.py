@@ -1,7 +1,7 @@
 import os
 
 import click
-from flask import Flask, current_app
+from flask import Flask, current_app, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -12,27 +12,30 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
+from .models import User, Transaction
 
-@click.command('init-db')
+
+# filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py
+@click.command("init-db")
 def init_db_command():
     """Create the database tables."""
     
     with current_app.app_context():
         db.create_all()
-        
-    click.echo('Initialized the database.')
+    click.echo("Initialized the database.")
+
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        SQLALCHEMY_DATABASE_URI= 'sqlite:///main.db',
+        SECRET_KEY="dev",
+        SQLALCHEMY_DATABASE_URI="sqlite:///main.db",
     )
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
 
     else:
         # load the test config if passed in
@@ -44,5 +47,7 @@ def create_app(test_config=None):
     app.cli.add_command(init_db_command)
     db.init_app(app)
     
-
+    from ..controllers import user
+    app.register_blueprint(user.app)
+    
     return app
