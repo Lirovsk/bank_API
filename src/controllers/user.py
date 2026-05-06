@@ -22,7 +22,7 @@ def create_user(data: dict):
 # function responsible to search for all users, if none it will return an empty list
 def search_users():
     try:
-        users = db.session.execute(db.select(User)).scalars().all()
+        users = db.session.execute(db.select(User)).scalars()
         return {"message": "Users fetched successfully", "users": [{"name": user.name, "email": user.email} for user in users]}, HTTPStatus.OK
     
     except Exception as e:
