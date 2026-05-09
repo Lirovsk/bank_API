@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-from .models import User, Account, Transaction
+from .models import User, AccountInfo, Transaction, Account
 
 
 # filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py
@@ -31,6 +31,9 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY="dev",
         SQLALCHEMY_DATABASE_URI="sqlite:///main.db",
+        SQLALCHEMY_BINDS={
+            "accounts": "sqlite:///accounts.db"
+        },
     )
 
     if test_config is None:
