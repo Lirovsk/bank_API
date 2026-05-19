@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import click
 from flask import Flask, current_app, Blueprint
@@ -11,8 +12,6 @@ class Base(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=Base)
-
-from .models import User, AccountInfo, Transaction, Account
 
 
 # filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py
@@ -31,9 +30,6 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY="dev",
         SQLALCHEMY_DATABASE_URI="sqlite:///main.db",
-        SQLALCHEMY_BINDS={
-            "accounts": "sqlite:///accounts.db"
-        },
     )
 
     if test_config is None:
@@ -44,13 +40,21 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    os.makedirs(app.instance_path, exist_ok=True)
+    # ensure the instance and the games folders exists
+    if Path(app.instance_path).exists() is False:
+        Path(app.instance_path).mkdir(parents=True, exist_ok=True)
+    
+    games = Path(app.instance_path) / "games"
+    
+    if games.exists() is False:
+        games.mkdir(parents=True, exist_ok=True)
+
 
     # command to initialize the database
     app.cli.add_command(init_db_command)
     db.init_app(app)
     
-    from ..controllers import user
-    app.register_blueprint(user.app)
+    from ..controllers import create_game
+    app.register_blueprint(create_game.app)
     
     return app
