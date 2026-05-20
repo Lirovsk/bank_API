@@ -32,8 +32,8 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    sender_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
-    recipient_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
+    sender_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id", ondelete="SET NULL"), nullable=True)
+    recipient_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id", ondelete="SET NULL"), nullable=True)
     amount: Mapped[int] = mapped_column(nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
