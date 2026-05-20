@@ -1,5 +1,6 @@
 from flask import Blueprint, request, current_app
 from ..app import db
+from ..app import db_engines
 from ..models import Game
 
 from pathlib import Path
@@ -8,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from ..models import Player, Transaction
+from .session_and_engine import EscopedEngines
 
 app = Blueprint("game", __name__, url_prefix="/game")
 
@@ -15,8 +17,8 @@ app = Blueprint("game", __name__, url_prefix="/game")
 # ======================== functions ========================
 def create_game_tables(game_uuid: str):
     # turn the following lines into a function that creates the engine
-    game_path = Path(current_app.instance_path) / "games" / f"{game_uuid}.db"
-    engine = create_engine(f"sqlite:///{game_path}")
+    url = EscopedEngines.create_url(game_uuid)
+    engine = db_engines.get_engine(url)
 
     try:
         Player.__table__.create(bind=engine, checkfirst=True)
