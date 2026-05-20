@@ -14,6 +14,10 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 
+from ..controllers.session_and_engine import EscopedEngines
+db_engines = EscopedEngines()
+
+
 # filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py
 @click.command("init-db")
 def init_db_command():
@@ -55,6 +59,8 @@ def create_app(test_config=None):
     db.init_app(app)
     
     from ..controllers import create_game
+    from ..controllers import player
     app.register_blueprint(create_game.app)
+    app.register_blueprint(player.app)
     
     return app
