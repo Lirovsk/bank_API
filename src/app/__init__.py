@@ -30,9 +30,9 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
-        SQLALCHEMY_DATABASE_URI="sqlite:///main.db",
+        SQLALCHEMY_DATABASE_URI="sqlite:///game.db",
         SQLALCHEMY_BINDS={
-            "accounts": "sqlite:///accounts.db"
+            "games": "sqlite:///games_info.db"
         },
     )
 
