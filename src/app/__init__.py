@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-from models import Transaction, Game, Player
+from .models import Transaction, Game, Player
 
 
 # filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py
@@ -50,7 +50,5 @@ def create_app(test_config=None):
     app.cli.add_command(init_db_command)
     db.init_app(app)
     
-    from ..controllers import user
-    app.register_blueprint(user.app)
     
     return app
