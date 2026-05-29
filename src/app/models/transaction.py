@@ -26,10 +26,10 @@ class Transaction(db.Model):
     recipient_id: Mapped[int] = mapped_column(ForeignKey("players.id"))
 
     sender: Mapped["Player"] = relationship("Player",
-                                            foreign_keys="sender_id",
+                                            foreign_keys=[sender_id],
                                             back_populates="transactions_made")
     recipient: Mapped["Player"] = relationship("Player",
-                                                foreign_keys="recipient_id",
+                                                foreign_keys=[recipient_id],
                                                 back_populates="transactions_received")
 
     def __repr__(self):
