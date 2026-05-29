@@ -50,5 +50,7 @@ def create_app(test_config=None):
     app.cli.add_command(init_db_command)
     db.init_app(app)
     
+    from ..controllers import game
+    app.register_blueprint(game.app)
     
     return app
