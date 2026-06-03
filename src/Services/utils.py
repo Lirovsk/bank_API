@@ -1,4 +1,5 @@
-
+from ..app.models import Game, Player
+from . import db
 
 class Utils:
     
@@ -13,3 +14,10 @@ class Utils:
                 values.append(arg)
         return has_null, ", ".join(values)
     
+    
+    @staticmethod
+    def check_game_exists(game_uuid: str) -> Game:
+        game = db.session.execute(db.select(Game).filter_by(id=game_uuid)).scalar_one_or_none()
+        if not game:
+            raise ValueError("Game not found.")
+        return game
