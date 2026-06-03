@@ -10,3 +10,5 @@ from ..app import db
 "Importing from this module"
 from .utils import Utils
 from .game import GameServices, GameCRUD
+from .player import PlayerServices, PlayerCRUD
+from .transaction import TransactionServices, TransactionCRUD
