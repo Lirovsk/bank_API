@@ -1,7 +1,7 @@
 from ...app import db
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, Integer, ForeignKey, Boolean
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -15,6 +15,7 @@ class Player(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     balance: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_banker: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     game: Mapped["Game"] = relationship("Game", back_populates="players")
     game_uuid: Mapped[str] = mapped_column(
         String(36), ForeignKey("games.id"), nullable=False
