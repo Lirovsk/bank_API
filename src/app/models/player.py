@@ -16,6 +16,7 @@ class Player(db.Model):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     balance: Mapped[int] = mapped_column(Integer, nullable=False)
     is_banker: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    bank: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     game: Mapped["Game"] = relationship("Game", back_populates="players")
     game_uuid: Mapped[str] = mapped_column(
         String(36), ForeignKey("games.id"), nullable=False
