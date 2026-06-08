@@ -15,7 +15,7 @@ class PlayerServices:
         pass
     
     @staticmethod
-    def create_player(name: str, balance: int, game: Game) -> Player:
+    def create_player(name: str, balance: int, game: Game, is_banker: bool=False) -> Player:
         new_player = Player(name=name, balance=balance, game=game)
         try:
             db.session.add(new_player)
@@ -79,6 +79,26 @@ class PlayerCRUD:
                 return {"message": "Player created successfully.", "player_id": new_player.id}, 201
             except Exception as e:
                 return {"error": str(e)}, 500
+    
+    
+    @staticmethod
+    def create_banker(data: dict, game_uuid: str) -> tuple[dict, int]:
+        has_null, null_values = Utils.check_for_null_data(data, "name")
+        if has_null:
+            return {"error": f"{null_values} is required."}, 400
+        
+        game = GameServices.search_game(game_uuid)
+        if not game:
+            return {"error": "Game not found."}, 404
+        
+        balance = game.start_value
+        
+        try:
+            new_player = PlayerServices.create_player(data["name"], balance, game, is_banker=True)
+            return {"message": "Banker created successfully.", "banker_id": new_player.id}, 201
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
 
     @staticmethod
     def delete_player(player_id: int=None, data: dict=None) -> tuple[dict, int]:

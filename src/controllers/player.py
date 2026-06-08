@@ -17,6 +17,12 @@ def create_player(game_uuid=None):
     return PlayerCRUD.create_player(data, game_uuid)
 
 
+@app.route("/create/banker/<game_uuid>", methods=["POST"])
+def create_banker(game_uuid):
+    data = request.get_json()
+    return PlayerCRUD.create_banker(data, game_uuid)
+
+
 @app.route("/delete", methods=["DELETE"])
 @app.route("/delete/<player_id>", methods=["DELETE"])
 def delete_player(player_id=None):
