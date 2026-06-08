@@ -12,6 +12,9 @@ class GameServices:
     def list_games():
         pass
 
+# Importing PlayerServices here to avoid circular imports. PlayerServices only imports Game model, not GameServices itself, so it won't cause issues. If we imported GameServices in player.py, it would cause a circular import error.
+from .player import PlayerServices
+
 
 class GameCRUD:
     
@@ -29,6 +32,13 @@ class GameCRUD:
         except Exception as e:
             db.session.rollback()
             return {"error": str(e)}, 500
+        
+        bank_value = data["start_value"] * 10
+        try:
+            PlayerServices.create_player(name="Banker", balance=bank_value, game=new_game, bank=True)
+        except Exception as e:
+            db.session.rollback()
+            return {"error": f"Game created but failed to create banker: {str(e)}"}, 500
         
         return {"message": "Game created successfully.", "game_id": new_game.id}, 201
     
@@ -89,6 +99,3 @@ class GameCRUD:
                          "start_value": valid_game.start_value,
                          "number_of_operations": valid_game.number_of_operations,
                          "number_of_players": len(valid_game.players)}}, 200
-
-        
-

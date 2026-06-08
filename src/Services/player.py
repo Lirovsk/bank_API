@@ -15,8 +15,8 @@ class PlayerServices:
         pass
     
     @staticmethod
-    def create_player(name: str, balance: int, game: Game, banker: bool=False) -> Player:
-        new_player = Player(name=name, balance=balance, game=game, is_banker=banker)
+    def create_player(name: str, balance: int, game: Game, banker: bool=False, bank: bool=False) -> Player:
+        new_player = Player(name=name, balance=balance, game=game, is_banker=banker, bank=bank)
         try:
             db.session.add(new_player)
             db.session.commit()
