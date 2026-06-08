@@ -24,13 +24,11 @@ def create_banker(game_uuid):
 
 
 @app.route("/delete", methods=["DELETE"])
-@app.route("/delete/<player_id>", methods=["DELETE"])
+@app.route("/delete/<int:player_id>", methods=["DELETE"])
 def delete_player(player_id=None):
-    if not player_id:
-        data = request.get_json()
-        return PlayerCRUD.delete_player(player_id, data)
-    else:
-        return PlayerCRUD.delete_player(player_id)
+    data = request.get_json(silent=True)
+    return PlayerCRUD.delete_player(data, player_id)
+
 
 
 @app.route("/update", methods=["PATCH"])
@@ -40,13 +38,11 @@ def update_player():
 
 
 @app.route("/get/one", methods=["GET"])
-@app.route("/get/one/<player_id>", methods=["GET"])
+@app.route("/get/one/<int:player_id>", methods=["GET"])
 def get_player(player_id=None):
-    if not player_id:
-        data = request.get_json()
-        return PlayerCRUD.get_player(player_id, data)
-    else:
-        return PlayerCRUD.get_player(player_id)
+    data = request.get_json(silent=True)
+    return PlayerCRUD.get_player(data, player_id)
+
 
 @app.route("/get/all/<game_uuid>", methods=["GET"])
 def get_players_by_game(game_uuid):

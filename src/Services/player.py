@@ -15,8 +15,8 @@ class PlayerServices:
         pass
     
     @staticmethod
-    def create_player(name: str, balance: int, game: Game, is_banker: bool=False) -> Player:
-        new_player = Player(name=name, balance=balance, game=game)
+    def create_player(name: str, balance: int, game: Game, banker: bool=False) -> Player:
+        new_player = Player(name=name, balance=balance, game=game, is_banker=banker)
         try:
             db.session.add(new_player)
             db.session.commit()
@@ -79,29 +79,27 @@ class PlayerCRUD:
                 return {"message": "Player created successfully.", "player_id": new_player.id}, 201
             except Exception as e:
                 return {"error": str(e)}, 500
-    
-    
+
     @staticmethod
     def create_banker(data: dict, game_uuid: str) -> tuple[dict, int]:
         has_null, null_values = Utils.check_for_null_data(data, "name")
         if has_null:
             return {"error": f"{null_values} is required."}, 400
-        
+
         game = GameServices.search_game(game_uuid)
         if not game:
             return {"error": "Game not found."}, 404
-        
+
         balance = game.start_value
-        
+
         try:
-            new_player = PlayerServices.create_player(data["name"], balance, game, is_banker=True)
+            new_player = PlayerServices.create_player(data["name"], balance, game, banker=True)
             return {"message": "Banker created successfully.", "banker_id": new_player.id}, 201
         except Exception as e:
             return {"error": str(e)}, 500
-        
 
     @staticmethod
-    def delete_player(player_id: int=None, data: dict=None) -> tuple[dict, int]:
+    def delete_player(data: dict=None, player_id: int=None) -> tuple[dict, int]:
         if not player_id:
             has_null, null_values = Utils.check_for_null_data(data, "player_id")
             if has_null:
@@ -111,6 +109,9 @@ class PlayerCRUD:
             if not player_to_delete:
                 return {"error": "Player not found."}, 404
 
+            if player_to_delete.is_banker:
+                return {"error": "Cannot delete the banker."}, 400
+
             try:
                 PlayerServices.delete_player(data["player_id"])
                 return {"message": "Player deleted successfully."}, 200
@@ -119,8 +120,11 @@ class PlayerCRUD:
 
         else:
             player_to_delete = PlayerServices.search_player(player_id)
-            if not player_to_delete:
+            if (not player_to_delete):
                 return {"error": "Player not found."}, 404
+
+            if player_to_delete.is_banker:
+                return {"error": "Cannot delete the banker."}, 400
 
             try:
                 PlayerServices.delete_player(player_id)
@@ -133,13 +137,13 @@ class PlayerCRUD:
         has_null, null_values = Utils.check_for_null_data(data, "player_id")
         if has_null:
             return {"error": f"{null_values} is required."}, 400
-        
+
         player = PlayerServices.search_player(data["player_id"])
 
         for info in data:
             if hasattr(player, info):
-                if info in (
-                    "id", "balance", "game", "game_uuid", "transactions_made", "transactions_received", "player_id",):
+                if info in ("id", "balance", "game", "game_uuid", 
+                            "transactions_made", "transactions_received", "player_id", "is_banker"):
                     continue
                 setattr(player, info, data[info])
 
@@ -151,7 +155,7 @@ class PlayerCRUD:
             return {"error": str(e)}, 500
 
     @staticmethod
-    def get_player(player_id=None, data: dict=None) -> tuple[dict, int]:
+    def get_player(data: dict = None, player_id=None) -> tuple[dict, int]:
         if not player_id:
             has_null, null_values = Utils.check_for_null_data(data, "player_id")
             if has_null:
@@ -164,7 +168,8 @@ class PlayerCRUD:
             return {"player": {"id": player.id,
                                "name": player.name,
                                "balance": player.balance,
-                               "game_uuid": player.game_uuid}}, 200
+                               "game_uuid": player.game_uuid,
+                               "is_banker": player.is_banker}}, 200
         else:
             player = PlayerServices.search_player(player_id)
             if not player:
@@ -174,9 +179,10 @@ class PlayerCRUD:
                                "name": player.name,
                                "balance": player.balance,
                                "game_uuid": player.game_uuid,
+                               "is_banker": player.is_banker,
                                "transactions_made": len(player.transactions_made),
                                "transactions_received": len(player.transactions_received)}}, 200 
-        
+
 
     @staticmethod
     def get_players_by_game(game_uuid: str) -> tuple[dict, int]:
