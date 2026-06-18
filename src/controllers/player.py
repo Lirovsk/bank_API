@@ -1,3 +1,5 @@
+from flask_jwt_extended import jwt_required
+
 from ..models import Player, Game
 from ..app import db
 from ..Services import Utils, PlayerCRUD
@@ -18,6 +20,7 @@ def create_player(game_uuid=None):
 
 
 @app.route("/create/banker/<game_uuid>", methods=["POST"])
+@jwt_required()
 def create_banker(game_uuid):
     data = request.get_json()
     return PlayerCRUD.create_banker(data, game_uuid)
@@ -25,6 +28,7 @@ def create_banker(game_uuid):
 
 @app.route("/delete", methods=["DELETE"])
 @app.route("/delete/<int:player_id>", methods=["DELETE"])
+@jwt_required()
 def delete_player(player_id=None):
     data = request.get_json(silent=True)
     return PlayerCRUD.delete_player(data, player_id)
@@ -32,6 +36,7 @@ def delete_player(player_id=None):
 
 
 @app.route("/update", methods=["PATCH"])
+@jwt_required()
 def update_player():
     data = request.get_json()
     return PlayerCRUD.update_player(data)
@@ -39,11 +44,13 @@ def update_player():
 
 @app.route("/get/one", methods=["GET"])
 @app.route("/get/one/<int:player_id>", methods=["GET"])
+@jwt_required()
 def get_player(player_id=None):
     data = request.get_json(silent=True)
     return PlayerCRUD.get_player(data, player_id)
 
 
 @app.route("/get/all/<game_uuid>", methods=["GET"])
+@jwt_required()
 def get_players_by_game(game_uuid):
     return PlayerCRUD.get_players_by_game(game_uuid)

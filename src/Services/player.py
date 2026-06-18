@@ -2,7 +2,9 @@ from . import db
 from ..models import Game, Player
 from .utils import Utils
 from .game import GameServices
+from http import HTTPStatus
 
+from flask_jwt_extended import create_access_token, current_user
 
 class PlayerServices:
 
@@ -58,7 +60,9 @@ class PlayerCRUD:
 
             try:
                 new_player = PlayerServices.create_player(name, balance, game)
-                return {"message": "Player created successfully.", "player_id": new_player.id}, 201
+                return {"message": "Player created successfully.", 
+                        "player_id": new_player.id,
+                        "access_token": create_access_token(identity=new_player)}, 201
             except Exception as e:
                 return {"error": str(e)}, 500
 
@@ -76,9 +80,14 @@ class PlayerCRUD:
 
             try:
                 new_player = PlayerServices.create_player(name, balance, game)
-                return {"message": "Player created successfully.", "player_id": new_player.id}, 201
             except Exception as e:
                 return {"error": str(e)}, 500
+            
+            access_token = create_access_token(identity=new_player)
+            return {
+                "message": "Player created successfully.",
+                "player_id": new_player.id,
+                "access_token": access_token}, 201
 
     @staticmethod
     def create_banker(data: dict, game_uuid: str) -> tuple[dict, int]:
@@ -94,7 +103,7 @@ class PlayerCRUD:
 
         try:
             new_player = PlayerServices.create_player(data["name"], balance, game, banker=True)
-            return {"message": "Banker created successfully.", "banker_id": new_player.id}, 201
+            return {"message": "Banker created successfully.", "banker_id": new_player.id, "access_token": create_access_token(identity=new_player)}, 201
         except Exception as e:
             return {"error": str(e)}, 500
 
@@ -104,42 +113,50 @@ class PlayerCRUD:
             has_null, null_values = Utils.check_for_null_data(data, "player_id")
             if has_null:
                 return {"error": f"{null_values} is required."}, 400
+            
+            if current_user.id == data["player_id"]:
+                player_to_delete = PlayerServices.search_player(data["player_id"])
+                if not player_to_delete:
+                    return {"error": "Player not found."}, 404
 
-            player_to_delete = PlayerServices.search_player(data["player_id"])
-            if not player_to_delete:
-                return {"error": "Player not found."}, 404
+                if player_to_delete.is_banker:
+                    return {"error": "Cannot delete the banker."}, 400
 
-            if player_to_delete.is_banker:
-                return {"error": "Cannot delete the banker."}, 400
-
-            try:
-                PlayerServices.delete_player(data["player_id"])
-                return {"message": "Player deleted successfully."}, 200
-            except Exception as e:
-                return {"error": str(e)}, 500
+                try:
+                    PlayerServices.delete_player(data["player_id"])
+                    return {"message": "Player deleted successfully."}, 200
+                except Exception as e:
+                    return {"error": str(e)}, 500
+            else:
+                return {"message": "Unauthorized action."}, 403
 
         else:
-            player_to_delete = PlayerServices.search_player(player_id)
-            if (not player_to_delete):
-                return {"error": "Player not found."}, 404
+            if current_user.id == player_id:
+                player_to_delete = PlayerServices.search_player(player_id)
+                if (not player_to_delete):
+                    return {"error": "Player not found."}, 404
 
-            if player_to_delete.is_banker:
-                return {"error": "Cannot delete the banker."}, 400
+                if player_to_delete.is_banker:
+                    return {"error": "Cannot delete the banker."}, 400
 
-            try:
-                PlayerServices.delete_player(player_id)
-                return {"message": "Player deleted successfully."}, 200
-            except Exception as e:
-                return {"error": str(e)}, 500
+                try:
+                    PlayerServices.delete_player(player_id)
+                    return {"message": "Player deleted successfully."}, 200
+                except Exception as e:
+                    return {"error": str(e)}, 500
+            else:
+                return {"message": "Unauthorized action."}, 403
 
     @staticmethod
     def update_player(data: dict) -> tuple[dict, int]:
         has_null, null_values = Utils.check_for_null_data(data, "player_id")
         if has_null:
             return {"error": f"{null_values} is required."}, 400
+        
+        if current_user.id != data["player_id"]:
+            return {"message": "Unauthorized action."}, 403
 
         player = PlayerServices.search_player(data["player_id"])
-
         for info in data:
             if hasattr(player, info):
                 if info in ("id", "balance", "game", "game_uuid", 
@@ -183,9 +200,11 @@ class PlayerCRUD:
                                "transactions_made": len(player.transactions_made),
                                "transactions_received": len(player.transactions_received)}}, 200 
 
-
     @staticmethod
     def get_players_by_game(game_uuid: str) -> tuple[dict, int]:
+        if current_user.game_uuid != game_uuid:
+            return {"message": "Unauthorized action."}, 403
+        
         players = db.session.execute(db.select(Player).filter_by(game_uuid=game_uuid)).scalars().all()
         return {"players": [{"id": player.id,
                              "name": player.name,
