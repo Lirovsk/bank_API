@@ -1,5 +1,5 @@
 from ..app import db
-from ..app.models import Transaction, Player, Game
+from ..models import Transaction, Player, Game
 from ..Services.transaction import TransactionCRUD
 
 from flask import Blueprint, request

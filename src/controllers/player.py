@@ -1,4 +1,4 @@
-from ..app.models import Player, Game
+from ..models import Player, Game
 from ..app import db
 from ..Services import Utils, PlayerCRUD
 

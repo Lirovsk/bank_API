@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-from .models import Transaction, Game, Player
+from ..models import Transaction, Game, Player
 
 
 # filepath: c:\Users\Arauj\Documents\VScode\python\projetos\flask-project\src\app\__init__.py

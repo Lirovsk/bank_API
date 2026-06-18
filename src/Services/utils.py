@@ -1,4 +1,4 @@
-from ..app.models import Game, Player
+from ..models import Game, Player
 from . import db
 
 class Utils:

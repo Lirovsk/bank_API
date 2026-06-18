@@ -2,7 +2,7 @@ from . import db
 from .player import PlayerServices
 from .utils import Utils
 
-from ..app.models import Transaction, Game, Player
+from ..models import Transaction, Game, Player
 
 
 class TransactionServices:

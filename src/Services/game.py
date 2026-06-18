@@ -1,5 +1,5 @@
 from . import db, Utils
-from ..app.models import Game
+from ..models import Game
 
 
 class GameServices:
